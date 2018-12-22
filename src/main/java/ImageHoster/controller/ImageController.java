@@ -1,5 +1,6 @@
 package ImageHoster.controller;
 
+import ImageHoster.model.Comment;
 import ImageHoster.model.Image;
 import ImageHoster.model.Tag;
 import ImageHoster.model.User;
@@ -16,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.time.ZoneId;
 import java.util.*;
 
 @Controller
@@ -47,11 +49,13 @@ public class ImageController {
     //this list is then sent to 'images/image.html' file and the tags are displayed
 
     //Modified this function to retrieve image based on the passed in primary key and hence changed the method name from getImageByTitle to getImageById in both service layer and repository layer.
+    //Modified this function to get the comments related the image.
     @RequestMapping("/images/{imageId}/{title}")
     public String showImage(@PathVariable("imageId") Integer imageId, Model model) {
         Image image = imageService.getImageById(imageId);
         model.addAttribute("image", image);
         model.addAttribute("tags", image.getTags());
+        model.addAttribute("comments", image.getComments());
         return "images/image";
     }
 
@@ -74,7 +78,6 @@ public class ImageController {
     //set the tags attribute of the image as a list of all the tags returned by the findOrCreateTags() method
     @RequestMapping(value = "/images/upload", method = RequestMethod.POST)
     public String createImage(@RequestParam("file") MultipartFile file, @RequestParam("tags") String tags, Image newImage, HttpSession session) throws IOException {
-
         User user = (User) session.getAttribute("loggeduser");
         newImage.setUser(user);
         String uploadedImageData = convertUploadedFileToBase64(file);
@@ -85,6 +88,23 @@ public class ImageController {
         newImage.setDate(new Date());
         imageService.uploadImage(newImage);
         return "redirect:/images";
+    }
+
+    //This controller method is used while submiting a comment from UI , with a POST request method.
+    //Accepts image id , to get the image object for which we are creating comments.
+    //Maps comments to image and user appropriately by setting the selected image and logged in user into the Comment Model
+    //After all redirects to the same page showing all the comments.
+    @RequestMapping(value = "/image/{imageId}/{imageTitle}/comments", method = RequestMethod.POST)
+    public String createComment(@PathVariable("imageId") Integer imageId,@RequestParam("comment") String comment, Comment newComment, HttpSession session) {
+        User user = (User) session.getAttribute("loggeduser");
+        Image selectedImage = imageService.getImageById(imageId);
+
+        newComment.setText(comment);
+        newComment.setCreatedDate(new Date().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+        newComment.setImage(selectedImage);
+        newComment.setUser(user);
+        imageService.createComment(newComment);
+        return "redirect:/images/" + selectedImage.getId() + "/" + selectedImage.getTitle();
     }
 
     //This controller method is called when the request pattern is of type 'editImage'
