@@ -27,8 +27,10 @@ public class ImageService {
 
 
     //The method calls the getImageByTitle() method in the Repository and passes the title of the image to be fetched
-    public Image getImageByTitle(String title) {
-        return imageRepository.getImageByTitle(title);
+
+    //Modified this function to retrieve image based on the passed in primary key and hence changed the method name from getImageByTitle to getImageById in both service layer and repository layer.
+    public Image getImageById(Integer imageId) {
+        return imageRepository.getImageById(imageId);
     }
 
     //The method calls the getImage() method in the Repository and passes the id of the image to be fetched
