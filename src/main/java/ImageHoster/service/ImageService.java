@@ -49,9 +49,4 @@ public class ImageService {
         imageRepository.deleteImage(imageId);
     }
 
-    //This method calls the createComment method in the Repository and passes the Comment to insert/persist.
-    public void createComment(Comment comment) {
-        imageRepository.createComment(comment);
-    }
-
 }

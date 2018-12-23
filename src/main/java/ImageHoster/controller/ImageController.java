@@ -90,23 +90,6 @@ public class ImageController {
         return "redirect:/images";
     }
 
-    //This controller method is used while submiting a comment from UI , with a POST request method.
-    //Accepts image id , to get the image object for which we are creating comments.
-    //Maps comments to image and user appropriately by setting the selected image and logged in user into the Comment Model
-    //After all redirects to the same page showing all the comments.
-    @RequestMapping(value = "/image/{imageId}/{imageTitle}/comments", method = RequestMethod.POST)
-    public String createComment(@PathVariable("imageId") Integer imageId,@RequestParam("comment") String comment, Comment newComment, HttpSession session) {
-        User user = (User) session.getAttribute("loggeduser");
-        Image selectedImage = imageService.getImageById(imageId);
-
-        newComment.setText(comment);
-        newComment.setCreatedDate(new Date().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
-        newComment.setImage(selectedImage);
-        newComment.setUser(user);
-        imageService.createComment(newComment);
-        return "redirect:/images/" + selectedImage.getId() + "/" + selectedImage.getTitle();
-    }
-
     //This controller method is called when the request pattern is of type 'editImage'
     //This method fetches the image with the corresponding id from the database and adds it to the model with the key as 'image'
     //The method then returns 'images/edit.html' file wherein you fill all the updated details of the image
@@ -163,7 +146,7 @@ public class ImageController {
         updatedImage.setDate(new Date());
 
         imageService.updateImage(updatedImage);
-        return "redirect:/images/" + updatedImage.getTitle();
+        return "redirect:/images/" + updatedImage.getId() + "/" + updatedImage.getTitle();
     }
 
 
